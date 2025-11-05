@@ -8,36 +8,36 @@ A high-performance stock trading platform built with Go that provides real-time 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         Frontend                             │
-│                  (Static Files/React/Vue)                    │
+│                         Frontend                            │
+│                  (Static Files/Next)                        │
 └──────────────────────┬──────────────────────────────────────┘
                        │ HTTP/WebSocket
 ┌──────────────────────┴──────────────────────────────────────┐
-│                      Main Server                             │
-│                    (main.go + Router)                        │
+│                      Main Server                            │
+│                    (main.go + Router)                       │
 └────────┬─────────┬─────────┬──────────┬─────────────────────┘
          │         │         │          │
-    ┌────▼───┐ ┌──▼───┐ ┌───▼────┐ ┌──▼─────────┐
-    │ Order  │ │Trade │ │Portfolio│ │ WebSocket  │
-    │Handler │ │Handler│ │ Handler │ │  Handler  │
-    └────┬───┘ └──┬───┘ └────┬────┘ └──┬─────────┘
-         │        │          │          │
-         │   ┌────▼──────────▼──────────▼───┐
-         │   │      PostgreSQL Database      │
+    ┌────▼───┐ ┌───▼───┐ ┌───▼─────┐ ┌──▼─────────┐
+    │ Order  │ │Trade  │ │Portfolio│ │ WebSocket  │
+    │Handler │ │Handler│ │ Handler │ │  Handler   │
+    └────┬───┘ └──┬────┘ └────┬────┘ └──┬─────────┘
+         │        │           │         │
+         │   ┌────▼───────────▼─────────▼───┐
+         │   │      PostgreSQL Database     │
          │   └──────────────────────────────┘
          │
-    ┌────▼──────────────────┐
-    │  Matching Engine      │
-    │  (In-Memory)          │
-    │  ┌─────────────────┐  │
-    │  │  Order Books    │  │
-    │  │  (Per Stock)    │  │
-    │  │  ┌───┐   ┌───┐  │  │
-    │  │  │Buy│   │Sell│ │  │
-    │  │  │Heap   │Heap│ │  │
-    │  │  └───┘   └───┘  │  │
-    │  └─────────────────┘  │
-    └───────────────────────┘
+    ┌────▼───────────────────┐
+    │  Matching Engine       │
+    │  (In-Memory)           │
+    │  ┌──────────────────┐  │
+    │  │  Order Books     │  │
+    │  │  (Per Stock)     │  │
+    │  │  ┌────┐   ┌────┐ │  │
+    │  │  │Buy │   │Sell│ │  │
+    │  │  │Heap│   │Heap│ │  │
+    │  │  └────┘   └────┘ │  │
+    │  └──────────────────┘  │
+    └────────────────────────┘
 ```
 
 ## Module Breakdown
