@@ -26,6 +26,8 @@ export default function StockChart({ stock }) {
         const tradesData = Array.isArray(fetched) ? fetched : [];
 
         setTrades(tradesData); // ✅ store fetched trades
+        console.log(trades);
+        console.log(data);
 
         // Aggregate trades by 5-minute intervals
         const aggregated = tradesData.reduce((acc, trade) => {

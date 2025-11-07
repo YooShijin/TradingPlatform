@@ -30,7 +30,9 @@ func main() {
 	// Initialize handlers
 	orderHandler := handlers.NewOrderHandler(db, engine)
 	portfolioHandler := handlers.NewPortfolioHandler(db)
-	tradeHandler := handlers.NewTradeHandler(db)
+	cacheSize := 10
+	cacheTTLSeconds := 100000
+	tradeHandler := handlers.NewTradeHandler(db, cacheSize, cacheTTLSeconds)
 	wsHandler := handlers.NewWebSocketHandler()
 
 	// Setup router
@@ -64,6 +66,11 @@ func setupRouter(
 
 	// Trade routes
 	api.HandleFunc("/trades/{stock}", tradeHandler.GetTrades).Methods("GET")
+
+	// Cache management endpoints
+	api.HandleFunc("/cache/stats", tradeHandler.GetCacheStats).Methods("GET")
+	api.HandleFunc("/cache/reset-stats", tradeHandler.ResetCacheStats).Methods("POST")
+	api.HandleFunc("/cache/clear", tradeHandler.ClearCache).Methods("POST")
 
 	// Portfolio routes
 	api.HandleFunc("/portfolio/{user_id}", portfolioHandler.GetPortfolio).Methods("GET")
