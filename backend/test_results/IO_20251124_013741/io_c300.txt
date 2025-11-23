@@ -1,0 +1,2 @@
+workloadType,clients,throughput,mean_latency_ms,median_latency_ms,successCount,failureCount
+CSV,disk-write,300,10845.2000,27.1806,26.0000,108452,0

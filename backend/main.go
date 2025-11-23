@@ -30,13 +30,12 @@ func main() {
 	// Initialize handlers
 	orderHandler := handlers.NewOrderHandler(db, engine)
 	portfolioHandler := handlers.NewPortfolioHandler(db)
-	cacheSize := 10
-	cacheTTLSeconds := 100000
-	tradeHandler := handlers.NewTradeHandler(db, cacheSize, cacheTTLSeconds)
+	tradeHandler := handlers.NewTradeHandler(db, cfg.CacheSize, cfg.CacheTTLSeconds)
 	wsHandler := handlers.NewWebSocketHandler()
+	diskWriteHandler := handlers.NewDiskWriteHandler(db) // NEW
 
 	// Setup router
-	router := setupRouter(orderHandler, portfolioHandler, tradeHandler, wsHandler)
+	router := setupRouter(orderHandler, portfolioHandler, tradeHandler, wsHandler, diskWriteHandler)
 
 	// Apply CORS middleware
 	handler := cors.AllowAll().Handler(router)
@@ -51,6 +50,7 @@ func setupRouter(
 	portfolioHandler *handlers.PortfolioHandler,
 	tradeHandler *handlers.TradeHandler,
 	wsHandler *handlers.WebSocketHandler,
+	diskWriteHandler *handlers.DiskWriteHandler, // NEW
 ) *mux.Router {
 	router := mux.NewRouter()
 
@@ -58,6 +58,16 @@ func setupRouter(
 	api := router.PathPrefix("/api").Subrouter()
 	api.Use(middleware.Logger)
 	api.Use(middleware.Recovery)
+
+	// Health check
+	api.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status":"ok"}`))
+	}).Methods("GET")
+
+	metricsHandler := handlers.NewMetricsHandler()
+	api.HandleFunc("/metrics", metricsHandler.GetMetrics).Methods("GET")
 
 	// Order routes
 	api.HandleFunc("/order/place", orderHandler.PlaceOrder).Methods("POST")
@@ -74,6 +84,11 @@ func setupRouter(
 
 	// Portfolio routes
 	api.HandleFunc("/portfolio/{user_id}", portfolioHandler.GetPortfolio).Methods("GET")
+
+	// Disk bound routes
+	api.HandleFunc("/disk/trade", diskWriteHandler.InsertTrade).Methods("POST")
+	api.HandleFunc("/disk/trades/bulk", diskWriteHandler.BulkInsertTrades).Methods("POST")
+	api.HandleFunc("/disk/balance", diskWriteHandler.UpdateBalance).Methods("POST")
 
 	// WebSocket endpoint
 	router.HandleFunc("/ws/trades", wsHandler.HandleConnection)

@@ -1,0 +1,2 @@
+workloadType,clients,throughput,average_latency,response_time,successCount,failureCount
+CSV,cpu-bound,250,40546.50,5.67,5,405465,0

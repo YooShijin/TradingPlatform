@@ -44,7 +44,7 @@ func (h *WebSocketHandler) HandleConnection(w http.ResponseWriter, r *http.Reque
 	h.clients[conn] = true
 	h.mu.Unlock()
 
-	log.Printf("🔌 WebSocket client connected (total: %d)", len(h.clients))
+	log.Printf("WebSocket client connected (total: %d)", len(h.clients))
 
 	// Start ping routine to keep connection alive
 	go h.keepAlive(conn)
@@ -54,7 +54,7 @@ func (h *WebSocketHandler) HandleConnection(w http.ResponseWriter, r *http.Reque
 		delete(h.clients, conn)
 		h.mu.Unlock()
 		conn.Close()
-		log.Printf("❌ WebSocket client disconnected (remaining: %d)", len(h.clients))
+		log.Printf("WebSocket client disconnected (remaining: %d)", len(h.clients))
 	}()
 
 	// Read messages to detect disconnect

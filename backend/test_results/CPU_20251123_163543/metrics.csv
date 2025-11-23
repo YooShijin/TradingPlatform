@@ -1,0 +1,7 @@
+timestamp,workload,clients,throughput,average_latency,response_time,success,failure
+20251123_163543,cpu-bound,pu_,42323.40,1.88,2,423234,0
+20251123_163543,cpu-bound,pu_,44748.30,0.00,0,447483,0
+20251123_163543,cpu-bound,pu_,44696.50,0.14,0,446965,0
+20251123_163543,cpu-bound,pu_,44066.50,0.67,0,440665,0
+20251123_163543,cpu-bound,pu_,42099.10,0.00,0,420991,0
+20251123_163543,cpu-bound,pu_,43230.90,1.26,1,432309,0

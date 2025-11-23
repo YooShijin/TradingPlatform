@@ -57,7 +57,7 @@ CREATE INDEX idx_trades_buyer ON trades(buyer_id, executed_at DESC);
 CREATE INDEX idx_trades_seller ON trades(seller_id, executed_at DESC);
 CREATE INDEX idx_trades_time ON trades(executed_at DESC);
 
--- Order book cache (for fast reads)
+-- Order book cache
 CREATE TABLE order_book_cache (
     stock_symbol VARCHAR(10) NOT NULL,
     side VARCHAR(10) NOT NULL CHECK (side IN ('BUY', 'SELL')),
@@ -70,12 +70,12 @@ CREATE TABLE order_book_cache (
 
 CREATE INDEX idx_orderbook_stock_side ON order_book_cache(stock_symbol, side, price_level DESC);
 
--- Seed initial data for testing
+-- Seed initial 1000 users
 INSERT INTO users (username, balance) 
 SELECT 'user' || i, 10000.00 
 FROM generate_series(1, 1000) i;
 
--- Create some initial stock holdings for testing
+-- Create some initial stock holdings
 INSERT INTO portfolios (user_id, stock_symbol, quantity, avg_buy_price)
 VALUES 
     (1, 'AAPL', 100, 150.00),
@@ -83,3 +83,53 @@ VALUES
     (2, 'TSLA', 75, 200.00),
     (2, 'MSFT', 200, 300.00),
     (3, 'AMZN', 30, 170.00);
+
+-- Create 100 extra users (consistent syntax)
+INSERT INTO users (username, balance)
+SELECT 'extra_user_' || i, 1000000.00
+FROM generate_series(1, 100) AS i
+ON CONFLICT DO NOTHING;
+
+-- Create portfolios for first 50 users
+INSERT INTO portfolios (user_id, stock_symbol, quantity, avg_buy_price)
+SELECT 
+    u.id,
+    s.symbol,
+    1000 + (random() * 9000)::int,
+    100.0 + (random() * 400)
+FROM users u
+CROSS JOIN (
+    SELECT unnest(ARRAY['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'BABA', 'ORCL']) AS symbol
+) s
+WHERE u.id <= 50
+ON CONFLICT DO NOTHING;
+
+-- Create 10000 historical trades
+INSERT INTO trades (stock_symbol, buyer_id, seller_id, buy_order_id, sell_order_id, price, quantity, executed_at)
+SELECT 
+    (ARRAY['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'BABA', 'ORCL'])[1 + (random() * 9)::int],
+    1 + (random() * 49)::int,
+    51 + (random() * 49)::int,
+    1, 2,
+    100.0 + (random() * 400),
+    1 + (random() * 100)::int,
+    NOW() - (random() * INTERVAL '24 hours')
+FROM generate_series(1, 10000);
+
+-- Create 1000 pending orders
+INSERT INTO orders (user_id, stock_symbol, order_type, price, quantity, status, created_at)
+SELECT 
+    1 + (random() * 99)::int,
+    (ARRAY['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'BABA', 'ORCL'])[1 + (random() * 9)::int],
+    (ARRAY['BUY', 'SELL'])[1 + (random() * 1)::int],
+    100.0 + (random() * 400),
+    1 + (random() * 100)::int,
+    'PENDING',
+    NOW() - (random() * INTERVAL '1 hour')
+FROM generate_series(1, 1000);
+
+-- Analyze tables
+ANALYZE users;
+ANALYZE orders;
+ANALYZE trades;
+ANALYZE portfolios;

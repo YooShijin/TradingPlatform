@@ -8,7 +8,7 @@ import (
 
 type CacheEntry struct {
 	Key       string
-	Value     interface{}
+	Value     any
 	ExpiresAt time.Time
 }
 
@@ -29,7 +29,7 @@ func NewLRUCache(capacity int) *LRUCache {
 	}
 }
 
-func (c *LRUCache) Get(key string) (interface{}, bool) {
+func (c *LRUCache) Get(key string) (any, bool) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -49,7 +49,7 @@ func (c *LRUCache) Get(key string) (interface{}, bool) {
 	return nil, false
 }
 
-func (c *LRUCache) Set(key string, value interface{}, ttl time.Duration) {
+func (c *LRUCache) Set(key string, value any, ttl time.Duration) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 

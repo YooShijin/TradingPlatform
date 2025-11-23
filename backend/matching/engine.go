@@ -1,10 +1,10 @@
 package matching
 
 import (
-	"trading/models"
 	"container/heap"
 	"sync"
 	"time"
+	"trading/models"
 )
 
 // OrderBook maintains buy and sell orders for a single stock
